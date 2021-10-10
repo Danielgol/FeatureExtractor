@@ -156,7 +156,7 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
         for ind, video in enumerate(videos):
             out_path = os.path.join(outdir, os.path.basename(video[:-4])) + '.pt'
 
-            with open('./done.txt') as file:
+            if os.path.exists(out_path):
                 if out_path in file.read():
                     print('{} exists, continue'.format(out_path))
                     done.append(out_path)
