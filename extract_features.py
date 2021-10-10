@@ -152,26 +152,28 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
         if not os.path.exists(outdir):
             os.makedirs(outdir)
 
-        done = []
         for ind, video in enumerate(videos):
             out_path = os.path.join(outdir, os.path.basename(video[:-4])) + '.pt'
 
-            if os.path.exists(out_path):
-                print('{} exists, continue'.format(out_path))
-                done.append(out_path)
-                continue
+            with open('./done.txt') as file:
+                if out_path in file.read():
+                    print('{} exists, continue'.format(out_path))
+                    continue
 
-            with open('./done.txt', 'a') as f:
-                f.writelines('\n'.join(done))
+            #if os.path.exists(out_path):
+            #    print('{} exists, continue'.format(out_path))
+            #    continue
 
             frames = load_all_rgb_frames_from_video(video, inp_channels)
             features = extract_features_fullvideo(i3d, frames, framespan, stride)
-
 
             if ind % 1 == 0:
                 print(ind, video, len(features), features[0].shape)
 
             torch.save(features, os.path.join(outdir, os.path.basename(video[:-4])) + '.pt')
+
+            with open('./done.txt', 'w') as f:
+                f.write('\n'.join(out_path))
 
 
 if __name__ == "__main__":
