@@ -152,13 +152,17 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
         if not os.path.exists(outdir):
             os.makedirs(outdir)
 
-
+        done = []
         for ind, video in enumerate(videos):
             out_path = os.path.join(outdir, os.path.basename(video[:-4])) + '.pt'
 
             if os.path.exists(out_path):
                 print('{} exists, continue'.format(out_path))
+                done.append(out_path)
                 continue
+
+            with open('./done.txt', 'a') as f:
+                f.writelines('\n'.join(done))
 
             frames = load_all_rgb_frames_from_video(video, inp_channels)
             features = extract_features_fullvideo(i3d, frames, framespan, stride)
