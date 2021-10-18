@@ -1,6 +1,9 @@
 import cv2
 import mediapipe as mp
 import math
+import numpy as np
+
+blank_image = np.zeros((50,50,3), np.uint8)
 
 mp_face_detection = mp.solutions.face_detection
 mp_drawing = mp.solutions.drawing_utils
@@ -14,6 +17,7 @@ def crop_face(image):
     # Draw face detections of each face.
     if not results.detections:
       print("blah")
+      return blank_image
 
     annotated_image = image.copy()
     for detection in results.detections:
