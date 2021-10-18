@@ -159,7 +159,7 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
     #i3d.replace_logits(1232)
 
     #print('loading weights {}'.format(weight))
-    i3d.load_state_dict(torch.load(weight))
+    #i3d.load_state_dict(torch.load(weight))
     #i3d.load_state_dict(torch.load(weight)['ckpt'])
 
     i3d.cuda()
