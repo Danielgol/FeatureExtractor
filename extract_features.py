@@ -52,17 +52,18 @@ def load_all_rgb_frames_from_video(video, desired_channel_order='rgb'):
 
 
             
-            if desired_channel_order == 'bgr':
-                frame = frame[:, :, [2, 1, 0]]
+            #if desired_channel_order == 'bgr':
+            #    frame = frame[:, :, [2, 1, 0]]
 
-            frame = (frame / 255.) * 2 - 1
-            frames.append(frame)
+            #frame = (frame / 255.) * 2 - 1
+            #frames.append(frame)
 
             currentFrame += 1
         except:
             break
 
-    nframes = np.asarray(frames, dtype=np.float32)
+    #nframes = np.asarray(frames, dtype=np.float32)
+    nframes = []
 
     nfaces = np.asarray(faces, dtype=np.float32)
     
@@ -171,10 +172,10 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
 
 
     # Face model feature extractor
-    fmodel = InceptionI3d(400, in_channels=3)
-    fmodel.replace_logits(2000)
-    fmodel.cuda()
-    fmodel.train(False)
+    #fmodel = InceptionI3d(400, in_channels=3)
+    #fmodel.replace_logits(2000)
+    #fmodel.cuda()
+    #fmodel.train(False)
 
 
 
@@ -212,17 +213,18 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
             #    print('opa')
 
             frames, face_frames = load_all_rgb_frames_from_video(video, inp_channels)
-            features = extract_features_fullvideo(i3d, frames, framespan, stride)
+            #features = extract_features_fullvideo(i3d, frames, framespan, stride)
 
-            face_features = extract_features_fullvideo(fmodel, face_frames, framespan, stride)
+            face_features = extract_features_fullvideo(i3d, face_frames, framespan, stride)
 
-            for i in range(len(face_features)):
-                features.append(face_features[i])
+            #for i in range(len(face_features)):
+            #    features.append(face_features[i])
 
             if ind % 1 == 0:
-                print(ind, video, len(features), features[0].shape)
+                #print(ind, video, len(features), features[0].shape)
+                print(ind, video, len(face_features), face_features[0].shape)
 
-            torch.save(features, os.path.join(outdir, os.path.basename(video[:-4])) + '.pt')
+            torch.save(face_features, os.path.join(outdir, os.path.basename(video[:-4])) + '.pt')
 
             with open('./done.txt', 'a') as f:
                 f.write(out_path + "\n")
