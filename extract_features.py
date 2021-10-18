@@ -5,6 +5,7 @@ import torch
 import cv2
 
 from models.pytorch_i3d import InceptionI3d
+from cropper import crop_face
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
@@ -25,6 +26,7 @@ def load_all_rgb_frames_from_video(video, desired_channel_order='rgb'):
     cap = cv2.VideoCapture(video)
     
     frames = []
+    faces = []
     
     currentFrame = 0
     while(True):
@@ -32,20 +34,41 @@ def load_all_rgb_frames_from_video(video, desired_channel_order='rgb'):
             ret, frame = cap.read()
             
             frame = cv2.resize(frame, dsize=(224, 224))
+
+
+
+
+            ###
+            cropped = crop_face(frame.copy())
+            cropped = cv2.resize(cropped, dsize=(224, 224))
+
+            if desired_channel_order == 'bgr':
+                cropped = cropped[:, :, [2, 1, 0]]
+
+            cropped = (cropped / 255.) * 2 - 1
+            faces.append(cropped)
+            ###
+
+
+
             
             if desired_channel_order == 'bgr':
                 frame = frame[:, :, [2, 1, 0]]
 
             frame = (frame / 255.) * 2 - 1
             frames.append(frame)
-        
+
             currentFrame += 1
         except:
             break
+
+    nframes = np.asarray(frames, dtype=np.float32)
+
+    nfaces = np.asarray(faces, dtype=np.float32)
     
-    return np.asarray(frames, dtype=np.float32)
+    return nframes, nfaces
 
-
+'''
 def load_rgb_frames_from_video(vid_path, vid, start, num, resize=(256, 256), desired_channel_order='rgb'):
     vidcap = cv2.VideoCapture(video_path)
 
@@ -74,7 +97,7 @@ def load_rgb_frames_from_video(vid_path, vid, start, num, resize=(256, 256), des
         frames.append(img)
 
     return np.asarray(frames, dtype=np.float32)
-
+'''
 
 def extract_features_fullvideo(model, inp, framespan, stride):
     rv = []
@@ -114,6 +137,8 @@ def _extract_features(model, frames):
         ft = model.extract_features(inputs)
     ft = ft.squeeze(-1).squeeze(-1)[0].transpose(0, 1)
 
+    #print(ft)
+
     ft = ft.cpu()
 
     return ft
@@ -128,12 +153,12 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
 
     # ===== setup models ======
     i3d = InceptionI3d(400, in_channels=3)
-
+    
     i3d.replace_logits(2000)
     #i3d.replace_logits(1232)
 
     #print('loading weights {}'.format(weight))
-    #i3d.load_state_dict(torch.load(weight))
+    i3d.load_state_dict(torch.load(weight))
     #i3d.load_state_dict(torch.load(weight)['ckpt'])
 
     i3d.cuda()
@@ -141,6 +166,18 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
 
     print('feature extraction starts.')
     i3d.train(False)  # Set model to evaluate mode
+    
+
+
+
+    # Face model feature extractor
+    fmodel = InceptionI3d(400, in_channels=3)
+    fmodel.replace_logits(2000)
+    fmodel.cuda()
+    fmodel.train(False)
+
+
+
 
     # ===== extract features ======
     # for framespan, stride in [(4, 2), (16, 8), (32, 16)]:
@@ -174,8 +211,13 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
             #while(True):
             #    print('opa')
 
-            frames = load_all_rgb_frames_from_video(video, inp_channels)
+            frames, face_frames = load_all_rgb_frames_from_video(video, inp_channels)
             features = extract_features_fullvideo(i3d, frames, framespan, stride)
+
+            face_features = extract_features_fullvideo(fmodel, face_frames, framespan, stride)
+
+            for i in range(len(face_features)):
+                features.append(face_features[i])
 
             if ind % 1 == 0:
                 print(ind, video, len(features), features[0].shape)
