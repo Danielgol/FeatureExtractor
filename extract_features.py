@@ -40,9 +40,12 @@ def load_all_rgb_frames_from_video(video, desired_channel_order='rgb'):
 
             ###
             cropped = crop_face(frame.copy())
-            cropped = cv2.resize(cropped, dsize=(224, 224))
 
             print("2")
+
+            cropped = cv2.resize(cropped, dsize=(224, 224))
+
+            print("3")
 
             if desired_channel_order == 'bgr':
                 cropped = cropped[:, :, [2, 1, 0]]
@@ -52,7 +55,7 @@ def load_all_rgb_frames_from_video(video, desired_channel_order='rgb'):
             ###
 
 
-            print("3")
+            
             
             #if desired_channel_order == 'bgr':
             #    frame = frame[:, :, [2, 1, 0]]
