@@ -17,8 +17,6 @@ def crop_face(image):
       print("blah")
       return np.zeros((50,50,3), np.uint8)
 
-    print("1")
-
     annotated_image = image.copy()
     for detection in results.detections:
       ymin = math.floor(detection.location_data.relative_bounding_box.ymin * 224)

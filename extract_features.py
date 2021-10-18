@@ -40,12 +40,7 @@ def load_all_rgb_frames_from_video(video, desired_channel_order='rgb'):
 
             ###
             cropped = crop_face(frame.copy())
-
-            print("2")
-
             cropped = cv2.resize(cropped, dsize=(224, 224))
-
-            print("3")
 
             if desired_channel_order == 'bgr':
                 cropped = cropped[:, :, [2, 1, 0]]
@@ -227,7 +222,7 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
 
             if ind % 1 == 0:
                 #print(ind, video, len(features), features[0].shape)
-                print(ind, video, len(face_features), face_features[0].shape)
+                print(ind, video, len(face_features))
 
             torch.save(face_features, os.path.join(outdir, os.path.basename(video[:-4])) + '.pt')
 
