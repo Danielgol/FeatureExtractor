@@ -28,43 +28,44 @@ def load_all_rgb_frames_from_video(video, desired_channel_order='rgb'):
     frames = []
     faces = []
     
-    currentFrame = 0
+    #last_cropped = np.zeros((224,224,3), np.uint8)
+
     while(True):
+
+        frame = np.zeros((224,224,3), np.uint8)
+
         try:
             ret, frame = cap.read()
-            
             frame = cv2.resize(frame, dsize=(224, 224))
 
-
-
-
-            ###
-            cropped = crop_face(frame.copy())
-            cropped = cv2.resize(cropped, dsize=(224, 224))
-
+            frame_transformed = frame.copy()   
+            
             if desired_channel_order == 'bgr':
-                cropped = cropped[:, :, [2, 1, 0]]
+                frame_transformed = frame_transformed[:, :, [2, 1, 0]]
 
-            cropped = (cropped / 255.) * 2 - 1
-            faces.append(cropped)
-            ###
-
-
-            
-            
-            #if desired_channel_order == 'bgr':
-            #    frame = frame[:, :, [2, 1, 0]]
-
-            #frame = (frame / 255.) * 2 - 1
-            #frames.append(frame)
-            currentFrame += 1
+            frame_transformed = (frame_transformed / 255.) * 2 - 1
+            frames.append(frame_transformed)
 
         except:
             break
 
-    #nframes = np.asarray(frames, dtype=np.float32)
-    nframes = []
 
+        '''Face Extractor
+        cropped = crop_face(frame.copy())
+
+        try:
+            cropped = cv2.resize(cropped, dsize=(224, 224))
+            #last_cropped = cropped.copy()
+        except:
+            cropped = np.zeros((224,224,3), np.uint8)
+            print("catch resize!")
+
+        cropped = (cropped / 255.) * 2 - 1
+        faces.append(cropped)
+        '''
+
+
+    nframes = np.asarray(frames, dtype=np.float32)
     nfaces = np.asarray(faces, dtype=np.float32)
     
     return nframes, nfaces
@@ -138,8 +139,6 @@ def _extract_features(model, frames):
         ft = model.extract_features(inputs)
     ft = ft.squeeze(-1).squeeze(-1)[0].transpose(0, 1)
 
-    #print(ft)
-
     ft = ft.cpu()
 
     return ft
@@ -154,36 +153,23 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
 
     # ===== setup models ======
     i3d = InceptionI3d(400, in_channels=3)
-    
     i3d.replace_logits(2000)
-    #i3d.replace_logits(1232)
-
-    #print('loading weights {}'.format(weight))
-    #i3d.load_state_dict(torch.load(weight))
-    #i3d.load_state_dict(torch.load(weight)['ckpt'])
-
+    i3d.load_state_dict(torch.load(weight)) # Network's Weight
     i3d.cuda()
-    #i3d = nn.DataParallel(i3d)
-
-    print('feature extraction starts.')
     i3d.train(False)  # Set model to evaluate mode
     
-
-
 
     # Face model feature extractor
     #fmodel = InceptionI3d(400, in_channels=3)
     #fmodel.replace_logits(2000)
     #fmodel.cuda()
-    #fmodel.train(False)
+    #fmodel.train(False) # Set model to evaluate mode
 
 
-
+    print('feature extraction starts.')
 
     # ===== extract features ======
-    # for framespan, stride in [(4, 2), (16, 8), (32, 16)]:
     for framespan, stride in [(16, 2), (12, 2), (8, 2)]:
-    # for framespan, stride in [(16, 8), (32, 16), (64, 32)]:
 
         outdir = os.path.join(outroot, 'span={}_stride={}'.format(framespan, stride))
 
@@ -203,28 +189,18 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
             #    print('{} exists, continue'.format(out_path))
             #    continue
 
-            #if os.path.exists(out_path):
-            #    print('{} exists, continue'.format(out_path))
-            #    done.append(out_path)
-            #    continue
-            #with open('./done.txt', 'a') as f:
-            #    f.writelines('\n'.join(done))
-            #while(True):
-            #    print('opa')
-
             frames, face_frames = load_all_rgb_frames_from_video(video, inp_channels)
-            #features = extract_features_fullvideo(i3d, frames, framespan, stride)
+            
+            features = extract_features_fullvideo(i3d, frames, framespan, stride)
+            #face_features = extract_features_fullvideo(fmodel, face_frames, framespan, stride)
 
-            face_features = extract_features_fullvideo(i3d, face_frames, framespan, stride)
-
+            #CONCATENADO
             #for i in range(len(face_features)):
             #    features.append(face_features[i])
 
-            if ind % 1 == 0:
-                #print(ind, video, len(features), features[0].shape)
-                print(ind, video, len(face_features))
+            print(ind, video, len(features))
 
-            torch.save(face_features, os.path.join(outdir, os.path.basename(video[:-4])) + '.pt')
+            torch.save(features, os.path.join(outdir, os.path.basename(video[:-4])) + '.pt')
 
             with open('./done.txt', 'a') as f:
                 f.write(out_path + "\n")

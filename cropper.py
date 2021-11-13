@@ -14,8 +14,7 @@ def crop_face(image):
 
     # Draw face detections of each face.
     if not results.detections:
-      print("blah")
-      return np.zeros((50,50,3), np.uint8)
+      return np.zeros((224,224,3), np.uint8)
 
     annotated_image = image.copy()
     for detection in results.detections:
