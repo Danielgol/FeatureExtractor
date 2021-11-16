@@ -50,7 +50,7 @@ def load_all_rgb_frames_from_video(video, desired_channel_order='rgb'):
             break
 
 
-        '''Face Extractor
+        #Face Extractor
         cropped = crop_face(frame.copy())
 
         try:
@@ -62,7 +62,6 @@ def load_all_rgb_frames_from_video(video, desired_channel_order='rgb'):
 
         cropped = (cropped / 255.) * 2 - 1
         faces.append(cropped)
-        '''
 
 
     nframes = np.asarray(frames, dtype=np.float32)
@@ -152,18 +151,18 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
         videos.extend([os.path.join(root, path) for path in paths])
 
     # ===== setup models ======
-    i3d = InceptionI3d(400, in_channels=3)
-    i3d.replace_logits(2000)
-    i3d.load_state_dict(torch.load(weight)) # Network's Weight
-    i3d.cuda()
-    i3d.train(False)  # Set model to evaluate mode
+    #i3d = InceptionI3d(400, in_channels=3)
+    #i3d.replace_logits(2000)
+    #i3d.load_state_dict(torch.load(weight)) # Network's Weight
+    #i3d.cuda()
+    #i3d.train(False)  # Set model to evaluate mode
     
 
     # Face model feature extractor
-    #fmodel = InceptionI3d(400, in_channels=3)
-    #fmodel.replace_logits(2000)
-    #fmodel.cuda()
-    #fmodel.train(False) # Set model to evaluate mode
+    fmodel = InceptionI3d(400, in_channels=3)
+    fmodel.replace_logits(2000)
+    fmodel.cuda()
+    fmodel.train(False) # Set model to evaluate mode
 
 
     print('feature extraction starts.')
@@ -191,16 +190,16 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
 
             frames, face_frames = load_all_rgb_frames_from_video(video, inp_channels)
             
-            features = extract_features_fullvideo(i3d, frames, framespan, stride)
-            #face_features = extract_features_fullvideo(fmodel, face_frames, framespan, stride)
+            #features = extract_features_fullvideo(i3d, frames, framespan, stride)
+            face_features = extract_features_fullvideo(fmodel, face_frames, framespan, stride)
 
             #CONCATENADO
             #for i in range(len(face_features)):
             #    features.append(face_features[i])
 
-            print(ind, video, len(features))
+            print(ind, video, len(face_features))
 
-            torch.save(features, os.path.join(outdir, os.path.basename(video[:-4])) + '.pt')
+            torch.save(face_features, os.path.join(outdir, os.path.basename(video[:-4])) + '.pt')
 
             with open('./done.txt', 'a') as f:
                 f.write(out_path + "\n")
