@@ -197,9 +197,9 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
             #for i in range(len(face_features)):
             #    features.append(face_features[i])
 
-            print(ind, video, len(face_features))
+            print(ind, video, len(features))
 
-            torch.save(face_features, os.path.join(outdir, os.path.basename(video[:-4])) + '.pt')
+            torch.save(features, os.path.join(outdir, os.path.basename(video[:-4])) + '.pt')
 
             #with open('./done.txt', 'a') as f:
             #    f.write(out_path + "\n")
