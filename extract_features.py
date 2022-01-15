@@ -5,6 +5,9 @@ import numpy as np
 import torch
 import cv2
 
+import datetime as dt
+from datetime import datetime
+
 from models.pytorch_i3d import InceptionI3d
 from cropper import crop_face
 
@@ -303,7 +306,7 @@ def run_h2s(weight, path_data, videos_folder, outroot, inp_channels='rgb'):
 
             frames = load_all_rgb_frames_from_how2sign(videos_folder, df.iloc[i]) # how2sign
             features = extract_features_fullvideo(i3d, frames, framespan, stride)
-            
+
             print(i, str(df.iloc[i][0]), len(features))
 
             torch.save(features, os.path.join(outdir, os.path.basename(video[:-4]))+ '_'+ str(i) + '.pt')
