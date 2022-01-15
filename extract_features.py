@@ -310,7 +310,7 @@ def run_h2s(weight, path_data, videos_folder, outroot, inp_channels='rgb'):
             video = str(df.iloc[i][0])
             print(i, video, len(features))
 
-            torch.save(features, os.path.join(outdir, os.path.basename(video[:-4]))+ '_'+ str(i) + '.pt')
+            torch.save(features, os.path.join(outdir, video+ '_'+ str(i) + '.pt'))
 
 
 if __name__ == "__main__":
