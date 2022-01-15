@@ -1,5 +1,6 @@
 import os
 
+import pandas as pd
 import numpy as np
 import torch
 import cv2
@@ -20,6 +21,69 @@ def load_rgb_frames(image_dir, vid, start, num, desired_channel_order='rgb'):
         img = (img / 255.) * 2 - 1
         frames.append(img)
     return np.asarray(frames, dtype=np.float32)
+
+
+def crop_video(path, iloc):
+    filename = path+str(iloc[0])+".mp4"
+    init = iloc[1]
+    end = iloc[2]
+    
+    frames = []
+    
+    cap = cv2.VideoCapture(filename) #Read Frame
+    fps = cap.get(cv2.CAP_PROP_FPS) #Extract the frame per second (fps)
+
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) #height
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) #width
+
+    origin = "00:00:00.00" #the origin
+    start = str(dt.timedelta(seconds=init)) #specify start time in hh:mm:ss
+    end = str(dt.timedelta(seconds=end)) #specify end time in hh:mm:ss
+
+    origintime = datetime.strptime(origin,'%H:%M:%S.%f') #origin 
+    starttime = datetime.strptime(start,'%H:%M:%S.%f') #start time
+    endtime = datetime.strptime(end,'%H:%M:%S.%f') #end time
+    
+    first = starttime-origintime
+    last = endtime-origintime
+    
+    startframe = fps*(first).total_seconds()  #get the start frame
+    endframe = fps*(last).total_seconds()  #get the end frame
+
+    counter = 1 #set counter
+    while(cap.isOpened()): #while the cap is open
+
+        ret, frame = cap.read() #read frame
+        if frame is None: #if frame is None
+            break  
+    
+        frame = cv2.resize(frame, (width,height)) #resize the frame
+        if counter >= startframe and counter <= endframe: #check for range of output
+            frames.append(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+
+        counter+=1  #increase counter
+    
+    return frames
+
+def load_all_rgb_frames_from_how2sign(path, iloc, desired_channel_order='rgb'):
+    frames = crop_video(path, iloc)
+    array = []
+
+    for i in range(len(frames)):
+        frame = cv2.resize(frames[i], dsize=(224, 224))
+
+        frame_transformed = frame.copy()   
+            
+        if desired_channel_order == 'bgr':
+            frame_transformed = frame_transformed[:, :, [2, 1, 0]]
+
+        frame_transformed = (frame_transformed / 255.) * 2 - 1
+        array.append(frame_transformed)
+
+    nframes = np.asarray(array, dtype=np.float32)
+    return nframes
+
+
 
 
 def load_all_rgb_frames_from_video(video, desired_channel_order='rgb'):
@@ -151,18 +215,18 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
         videos.extend([os.path.join(root, path) for path in paths])
 
     # ===== setup models ======
-    #i3d = InceptionI3d(400, in_channels=3)
-    #i3d.replace_logits(2000)
-    #i3d.load_state_dict(torch.load(weight)) # Network's Weight
-    #i3d.cuda()
-    #i3d.train(False)  # Set model to evaluate mode
+    i3d = InceptionI3d(400, in_channels=3)
+    i3d.replace_logits(2000)
+    i3d.load_state_dict(torch.load(weight)) # Network's Weight
+    i3d.cuda()
+    i3d.train(False)  # Set model to evaluate mode
     
 
     # Face model feature extractor
-    fmodel = InceptionI3d(400, in_channels=3)
-    fmodel.replace_logits(2000)
-    fmodel.cuda()
-    fmodel.train(False) # Set model to evaluate mode
+    #fmodel = InceptionI3d(400, in_channels=3)
+    #fmodel.replace_logits(2000)
+    #fmodel.cuda()
+    #fmodel.train(False) # Set model to evaluate mode
 
 
     print('feature extraction starts.')
@@ -175,14 +239,13 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
         if not os.path.exists(outdir):
             os.makedirs(outdir)
 
-
         for ind, video in enumerate(videos):
             out_path = os.path.join(outdir, os.path.basename(video[:-4])) + '.pt'
 
-            with open('./done.txt') as file:
-                if out_path in file.read():
-                    print('{} exists, continue'.format(out_path))
-                    continue
+            #with open('./done.txt') as file:
+            #    if out_path in file.read():
+            #        print('{} exists, continue'.format(out_path))
+            #        continue
 
             #if os.path.exists(out_path):
             #    print('{} exists, continue'.format(out_path))
@@ -190,20 +253,60 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
 
             frames, face_frames = load_all_rgb_frames_from_video(video, inp_channels)
             
-            #features = extract_features_fullvideo(i3d, frames, framespan, stride)
-            face_features = extract_features_fullvideo(fmodel, face_frames, framespan, stride)
+            features = extract_features_fullvideo(i3d, frames, framespan, stride)
+            #face_features = extract_features_fullvideo(fmodel, face_frames, framespan, stride)
 
             #CONCATENADO
             #for i in range(len(face_features)):
             #    features.append(face_features[i])
 
-            print(ind, video, len(face_features))
+            print(ind, video, len(features))
 
-            torch.save(face_features, os.path.join(outdir, os.path.basename(video[:-4])) + '.pt')
+            torch.save(features, os.path.join(outdir, os.path.basename(video[:-4])) + '.pt')
 
-            with open('./done.txt', 'a') as f:
-                f.write(out_path + "\n")
-                f.close()
+            #with open('./done.txt', 'a') as f:
+            #    f.write(out_path + "\n")
+            #    f.close()
+
+
+
+def run_h2s(weight, path_data, videos_folder, outroot, inp_channels='rgb'):
+
+    text_file = open(path_data, "r")
+
+    lines = text_file.readlines()
+    video = list(map(lambda elem: str(elem.split('\t')[0]), lines))
+    init = list(map(lambda elem: float(elem.split('\t')[1]), lines))
+    end = list(map(lambda elem: float(elem.split('\t')[2]), lines))
+    frase = list(map(lambda elem: str(elem.split('\t')[3]), lines))
+
+    df = pd.DataFrame({'video': video, 'init': init, 'end': end, 'frase': frase})
+
+    # ===== setup models ======
+    i3d = InceptionI3d(400, in_channels=3)
+    i3d.replace_logits(2000)
+    i3d.load_state_dict(torch.load(weight))
+    i3d.cuda()
+    i3d.train(False)
+
+    print('feature extraction starts.')
+
+    # ===== extract features ======
+    for framespan, stride in [(16, 2), (12, 2), (8, 2)]:
+
+        outdir = os.path.join(outroot, 'span={}_stride={}'.format(framespan, stride))
+
+        if not os.path.exists(outdir):
+            os.makedirs(outdir)
+
+        for i in range(len(df)):
+
+            frames = load_all_rgb_frames_from_how2sign(videos_folder, df.iloc[i]) # how2sign
+            features = extract_features_fullvideo(i3d, frames, framespan, stride)
+            
+            print(i, str(df.iloc[i][0]), len(features))
+
+            torch.save(features, os.path.join(outdir, os.path.basename(video[:-4]))+ '_'+ str(i) + '.pt')
 
 
 if __name__ == "__main__":
@@ -219,4 +322,9 @@ if __name__ == "__main__":
     # out = '/home/dongxu/Dongxu/workspace/translation/data/PHOENIX-2014-T/features/i3d-features'
     out = '../i3d-features'
 
-    run(weight, videos_roots, out, 'rgb')
+    #run(weight, videos_roots, out, 'rgb')
+
+
+    path_data = '../../input/h2s10/frases.txt'
+    videos_folder = '../../input/h2s10/h2s10'
+    run_h2s(weight, path_data, videos_folder, outroot, 'rgb')
