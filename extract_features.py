@@ -27,6 +27,7 @@ def load_rgb_frames(image_dir, vid, start, num, desired_channel_order='rgb'):
 
 
 def crop_video(path, iloc):
+
     filename = path+str(iloc[0])+".mp4"
     init = iloc[1]
     end = iloc[2]
@@ -330,5 +331,5 @@ if __name__ == "__main__":
 
 
     path_data = '../../input/h2s10/frases.txt'
-    videos_folder = '../../input/h2s10/h2s10'
+    videos_folder = '../../input/h2s10/h2s10/'
     run_h2s(weight, path_data, videos_folder, out, 'rgb')
