@@ -282,7 +282,7 @@ def run_h2s(weight, path_data, videos_folder, outroot, inp_channels='rgb'):
     video = list(map(lambda elem: str(elem.split('\t')[0]), lines))
     init = list(map(lambda elem: float(elem.split('\t')[1]), lines))
     end = list(map(lambda elem: float(elem.split('\t')[2]), lines))
-    frase = list(map(lambda elem: str(elem.split('\t')[3]), lines))
+    frase = list(map(lambda elem: str(elem.split('\t')[3]).replace('\n',''), lines))
 
     df = pd.DataFrame({'video': video, 'init': init, 'end': end, 'frase': frase})
 
