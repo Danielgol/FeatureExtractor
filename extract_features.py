@@ -44,6 +44,12 @@ def crop_video(path, iloc):
     start = str(dt.timedelta(seconds=init)) #specify start time in hh:mm:ss
     end = str(dt.timedelta(seconds=end)) #specify end time in hh:mm:ss
 
+    if not '.' in start:
+        start += ".00"
+        
+    if not '.' in end:
+        end += ".00"
+
     origintime = datetime.strptime(origin,'%H:%M:%S.%f') #origin 
     starttime = datetime.strptime(start,'%H:%M:%S.%f') #start time
     endtime = datetime.strptime(end,'%H:%M:%S.%f') #end time
