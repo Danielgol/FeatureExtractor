@@ -317,7 +317,14 @@ def run_h2s(weight, path_data, videos_folder, outroot, inp_channels='rgb'):
             video = str(df.iloc[i][0])
             print(i, video, len(features))
 
-            torch.save(features, os.path.join(outdir, video+ '_'+ str(i) + '.pt'))
+            name = video+ '_'+ str(i)
+
+            torch.save(features, os.path.join(outdir, name + '.pt'))
+
+            with open('../all.txt', 'a') as f:
+                info = "{\"ident\": \""+ name +"\", \"size\": " + str(len(features)) + "}"
+                f.write(info + ",")
+                f.close()
 
 
 if __name__ == "__main__":
