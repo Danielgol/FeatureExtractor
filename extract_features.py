@@ -126,7 +126,6 @@ def load_all_rgb_frames_from_video(video, desired_channel_order='rgb'):
 
         #Face Extractor
         cropped = crop_face(frame.copy())
-
         try:
             cropped = cv2.resize(cropped, dsize=(224, 224))
             #last_cropped = cropped.copy()
