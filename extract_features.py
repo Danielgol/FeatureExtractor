@@ -210,6 +210,8 @@ def _extract_features(model, frames):
         ft = model.extract_features(inputs)
     ft = ft.squeeze(-1).squeeze(-1)[0].transpose(0, 1)
 
+    print("OUTSIDE", ft.size())
+
     ft = ft.cpu()
 
     return ft
