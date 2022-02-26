@@ -348,6 +348,7 @@ class InceptionI3d(nn.Module):
         
 
     def extract_features(self, x):
+        torch.save(x, '../input.pt')
         for end_point in self.VALID_ENDPOINTS:
             if end_point in self.end_points:
                 x = self._modules[end_point](x)
