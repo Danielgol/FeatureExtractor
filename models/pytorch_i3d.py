@@ -10,6 +10,9 @@ import sys
 from collections import OrderedDict
 
 
+counter = 0
+
+
 class MaxPool3dSamePadding(nn.MaxPool3d):
     
     def compute_pad(self, dim, s):
@@ -354,5 +357,5 @@ class InceptionI3d(nn.Module):
                 print(str(end_point), x.size())
         x = self.avg_pool(x)
         print(x.size())
-        print("\n\n\n\n")
+        torch.save(x, "../"+counter+'.pt')
         return x
