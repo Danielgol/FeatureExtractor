@@ -132,7 +132,6 @@ def load_all_rgb_frames_from_video(video, desired_channel_order='rgb'):
         except:
             cropped = np.zeros((224,224,3), np.uint8)
             print("catch resize!")
-
         cropped = (cropped / 255.) * 2 - 1
         faces.append(cropped)
 
@@ -339,9 +338,10 @@ if __name__ == "__main__":
     # out = '/home/dongxu/Dongxu/workspace/translation/data/PHOENIX-2014-T/features/i3d-features'
     out = '../i3d-features'
 
-    #run(weight, videos_roots, out, 'rgb')
+    run(weight, videos_roots, out, 'rgb')
 
-
+    '''
     path_data = '../../input/h2s10/frases.txt'
     videos_folder = '../../input/h2s10/h2s10/'
     run_h2s(weight, path_data, videos_folder, out, 'rgb')
+    '''
