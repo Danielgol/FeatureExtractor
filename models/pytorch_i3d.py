@@ -356,7 +356,7 @@ class InceptionI3d(nn.Module):
                 x = self._modules[end_point](x)
                 print(str(end_point), x.size())
         x = self.avg_pool(x)
-        print(x.size())
-        torch.save(x, "../"+str(counter)+'.pt')
+        print(counter, x.size())
+        torch.save(x, '../'+str(counter)+'.pt')
         counter += 1
         return x
