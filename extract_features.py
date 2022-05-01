@@ -173,7 +173,7 @@ if __name__ == "__main__":
     # ======= Extract Features for PHEOENIX-2014-T ========
     videos_roots = [
         '../videos/train',
-        '../videos/dev',
+        '../videos/valid',
         '../videos/test'
     ]
 
