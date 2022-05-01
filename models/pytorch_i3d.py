@@ -141,7 +141,7 @@ class InceptionModule(nn.Module):
                           name=name+'/Branch_3/Conv3d_0b_1x1')
         self.name = name
 
-    def forward(self, x):    
+    def forward(self, x):
         b0 = self.b0(x)
         b1 = self.b1b(self.b1a(x))
         b2 = self.b2b(self.b2a(x))
@@ -348,12 +348,7 @@ class InceptionI3d(nn.Module):
         
 
     def extract_features(self, x):
-        torch.save(x, '../input.pt')
         for end_point in self.VALID_ENDPOINTS:
             if end_point in self.end_points:
                 x = self._modules[end_point](x)
-                torch.save(x, '../'+str(end_point)+'.pt')
-                print(str(end_point), x.size())
-        output = self.avg_pool(x)
-        torch.save(output, '../'+str(end_point)+'.pt')
-        return output
+        return self.avg_pool(x)
