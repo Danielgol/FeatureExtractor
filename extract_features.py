@@ -29,7 +29,7 @@ def load_all_rgb_frames_from_video(video, desired_channel_order='rgb'):
         frame = np.zeros((224,224,3), np.uint8)
 
         try:
-            count += 1
+            
             ret, frame = cap.read()
             frame = cv2.resize(frame, dsize=(224, 224))
 
@@ -40,6 +40,7 @@ def load_all_rgb_frames_from_video(video, desired_channel_order='rgb'):
 
             frame_transformed = (frame_transformed / 255.) * 2 - 1
             frames.append(frame_transformed)
+            count += 1
 
         except:
             break
