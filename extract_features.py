@@ -16,6 +16,8 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 def load_all_rgb_frames_from_video(video, desired_channel_order='rgb'):
     cap = cv2.VideoCapture(video)
+
+    count = 0
     
     frames = []
     faces = []
@@ -27,6 +29,7 @@ def load_all_rgb_frames_from_video(video, desired_channel_order='rgb'):
         frame = np.zeros((224,224,3), np.uint8)
 
         try:
+            count += 1
             ret, frame = cap.read()
             frame = cv2.resize(frame, dsize=(224, 224))
 
@@ -53,6 +56,7 @@ def load_all_rgb_frames_from_video(video, desired_channel_order='rgb'):
         cropped = (cropped / 255.) * 2 - 1
         faces.append(cropped)
         '''
+    print(count)
 
     nframes = np.asarray(frames, dtype=np.float32)
     nfaces = np.asarray(faces, dtype=np.float32)
