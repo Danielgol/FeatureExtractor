@@ -144,10 +144,13 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
         for ind, video in enumerate(videos):
             out_path = os.path.join(outdir, os.path.basename(video[:-4])) + '.pt'
 
-            with open('./done.txt') as file:
-                if out_path in file.read():
-                    print('{} exists, continue'.format(out_path))
-                    continue
+            #with open('./done.txt') as file:
+            #    if out_path in file.read():
+            #        print('{} exists, continue'.format(out_path))
+            #        continue
+
+            if not ("marcos" in video and "a82" in video and "o08" in video):
+                continue
 
             #if os.path.exists(out_path):
             #    print('{} exists, continue'.format(out_path))
