@@ -146,7 +146,7 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
 
             total += 1
 
-            if total < 2534:
+            if total < 10070:
                 print("continue")
                 continue
 
