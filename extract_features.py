@@ -130,7 +130,7 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
     #fmodel.cuda()
     #fmodel.train(False) # Set model to evaluate mode
 
-
+    total = 0
     print('feature extraction starts.')
 
     # ===== extract features ======
@@ -143,6 +143,12 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
 
         for ind, video in enumerate(videos):
             out_path = os.path.join(outdir, os.path.basename(video[:-4])) + '.pt'
+
+            total += 1
+
+            if total < 2534:
+                print("continue")
+                continue
 
             with open('./done.txt') as file:
                 if out_path in file.read():
