@@ -16,8 +16,6 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 def load_all_rgb_frames_from_video(video, desired_channel_order='rgb'):
     cap = cv2.VideoCapture(video)
-
-    count = 0
     
     frames = []
     faces = []
@@ -29,7 +27,6 @@ def load_all_rgb_frames_from_video(video, desired_channel_order='rgb'):
         frame = np.zeros((224,224,3), np.uint8)
 
         try:
-            
             ret, frame = cap.read()
             frame = cv2.resize(frame, dsize=(224, 224))
 
@@ -40,7 +37,6 @@ def load_all_rgb_frames_from_video(video, desired_channel_order='rgb'):
 
             frame_transformed = (frame_transformed / 255.) * 2 - 1
             frames.append(frame_transformed)
-            count += 1
 
         except:
             break
@@ -57,7 +53,6 @@ def load_all_rgb_frames_from_video(video, desired_channel_order='rgb'):
         cropped = (cropped / 255.) * 2 - 1
         faces.append(cropped)
         '''
-    print(count)
 
     nframes = np.asarray(frames, dtype=np.float32)
     nfaces = np.asarray(faces, dtype=np.float32)
@@ -149,13 +144,10 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
         for ind, video in enumerate(videos):
             out_path = os.path.join(outdir, os.path.basename(video[:-4])) + '.pt'
 
-            #with open('./done.txt') as file:
-            #    if out_path in file.read():
-            #        print('{} exists, continue'.format(out_path))
-            #        continue
-
-            if not ("marcos" in video and "a82" in video and "o08" in video):
-                continue
+            with open('./done.txt') as file:
+                if out_path in file.read():
+                    print('{} exists, continue'.format(out_path))
+                    continue
 
             #if os.path.exists(out_path):
             #    print('{} exists, continue'.format(out_path))
@@ -180,9 +172,10 @@ if __name__ == "__main__":
 
     # ======= Extract Features for PHEOENIX-2014-T ========
     videos_roots = [
-        '../videos/train',
-        '../videos/valid',
-        '../videos/test'
+        #'../videos/train',
+        #'../videos/valid',
+        #'../videos/test'
+        '../cesarld_compressed'
     ]
 
     out = '../i3d-features'
