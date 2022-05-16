@@ -146,14 +146,14 @@ def run(weight, frame_roots, outroot, inp_channels='rgb'):
 
             total += 1
 
-            if total < 13321:
-                print("continue")
-                continue
+            #if total < 13321:
+            #    print("continue")
+            #    continue
 
-            with open('./done.txt') as file:
-                if out_path in file.read():
-                    print('{} exists, continue'.format(out_path))
-                    continue
+            #with open('./done.txt') as file:
+            #    if out_path in file.read():
+            #        print('{} exists, continue'.format(out_path))
+            #        continue
 
             #if os.path.exists(out_path):
             #    print('{} exists, continue'.format(out_path))
